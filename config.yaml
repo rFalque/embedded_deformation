@@ -1,0 +1,43 @@
+# input output file path data
+io_files:
+  # input_ply: "../data/input.ply"
+  input_ply: "../data/pose_1.ply"
+  pointwise_correspondence: "../data/FAUST_move_hand.csv"
+  # pointwise_correspondence: "../data/FAUST_dabing.csv"
+
+  # for cases where the graph is provided
+  # pointwise_correspondence: "../data/drill_rotation.csv"
+  input_obj: "../data/graphs_test/surface_to_deform.obj"
+  #graph_obj: "../data/graphs_test/0_graph_complete.obj"
+  #graph_obj: "../data/graphs_test/1_graph_complete_smaller.obj"
+  #graph_obj: "../data/graphs_test/3_1_node_connectetivity.obj"
+  graph_obj: "../data/graphs_test/4_1_edge_connectetivity.obj"
+  #graph_obj: "../data/graphs_test/5_2_edge_connectetivity.obj"
+   
+  output_ply: "../data/output.ply"
+
+general_params:
+  verbose: true         # enable / disable the output (true / false)
+  visualization: true   # enable / disable the visualizations (true / false)
+  graph_provided: false  # skip the graph generation step (true / false)
+
+# Parameters for the embedded_deformation
+embedded_deformation:
+  # if true: load mesh; else: load pointCloud;
+  use_mesh: true
+
+  # 
+  use_geodesic: true
+
+  # 
+  k: 5
+
+  # grid_resolution: 18.0
+  grid_resolution: 40.0
+
+visualization_params:
+  nodes_ratio: 50.0
+  edges_ratio: 200.0
+  graph_res: 30.0
+  nodes_color : [1.0, 0.1, 0.1]
+  edges_color : [0.1, 0.1, 0.1]
