@@ -10,8 +10,6 @@
 #include <ceres/ceres.h>
 #include <ceres/gradient_checker.h>
 
-#include "../utils/options.hpp"
-
 #include "costFunction.hpp"
 
 #include "libGraphCpp/graph.hpp"

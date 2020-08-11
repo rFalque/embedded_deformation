@@ -12,11 +12,7 @@
 #include "IO/writePLY.h"
 #include "IO/loadCSV.hpp"
 
-
-
 #include "embedded_deformation/embedDeform.hpp"
-
-
 
 int main(int argc, char* argv[])
 {
