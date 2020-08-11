@@ -32,25 +32,6 @@ bool const kCheckGradient = false;
 bool const kCheckGradientReport = false;
 
 
-embedded_deformation::embedded_deformation(Eigen::MatrixXd V_in, 
-										   Eigen::MatrixXi F_in,
-										   Eigen::MatrixXd N_in, 
-										   Eigen::MatrixXi E_in,
-										   options opts)
-{
-	std::cout << "embedded deformation constructor: graph provided\n";
-	use_knn_ = true;
-	use_dijkstra_ = false;
-	
-	// extract point cloud
-	nodes_connectivity_ = opts.k;
-	verbose_ = opts.verbose;
-
-	// save the data
-	V_ = V_in;
-	F_ = F_in;
-	deformation_graph = new libgraphcpp::Graph(N_in, E_in);
-}
 
 
 embedded_deformation::embedded_deformation(Eigen::MatrixXd V_in, Eigen::MatrixXi F_in,
@@ -312,5 +293,4 @@ void embedded_deformation::deform(Eigen::MatrixXd sources, Eigen::MatrixXd targe
 
 void embedded_deformation::show_deformation_graph()
 {
-	visualization::plot(*deformation_graph, "deformation graph");
 }

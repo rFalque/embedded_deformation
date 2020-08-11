@@ -1,3 +1,0 @@
-[submodule "external_libraries/libGraphCpp"]
-	path = external_libraries/libGraphCpp
-	url = https://github.com/rFalque/libGraphCpp

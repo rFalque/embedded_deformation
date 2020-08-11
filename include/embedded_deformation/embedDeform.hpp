@@ -14,19 +14,12 @@
 
 #include "costFunction.hpp"
 
-#include "libGraphCpp/include/libGraphCpp/graph.hpp"
-#include "libGraphCpp/include/libGraphCpp/plotGraph.hpp"
+#include "libGraphCpp/graph.hpp"
 
 class embedded_deformation
 {
 public:
 
-	// provide the mesh and the graph
-	embedded_deformation(Eigen::MatrixXd V_in, 
-						 Eigen::MatrixXi F_in,
-						 Eigen::MatrixXd N_in, 
-						 Eigen::MatrixXi E_in,
-						 options opts);
 
 	// provide the mesh
 	embedded_deformation(Eigen::MatrixXd V_in, 
