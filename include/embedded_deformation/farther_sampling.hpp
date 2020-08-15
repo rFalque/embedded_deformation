@@ -32,6 +32,7 @@ inline bool farthest_sampling_by_sphere(Eigen::MatrixXd & in_cloud, double sampl
     std::vector<int> node_list;
     Eigen::VectorXd mindst = Eigen::VectorXd::Constant(in_cloud.rows(), -1); // used as NaN
 
+
     for (int i=0; i<in_cloud.rows(); i++) {
 
         if (correspondences(i) == 0) {
@@ -87,7 +88,20 @@ inline bool farthest_sampling_by_sphere(Eigen::MatrixXd & in_cloud, double sampl
 inline bool farthest_sampling_by_sphere(Eigen::MatrixXd & in_cloud, double sample_radius, Eigen::MatrixXd & nodes)
 {
     Eigen::VectorXi correspondences;
-    return farthest_sampling_by_sphere(in_cloud, sample_radius, nodes);
+    return farthest_sampling_by_sphere(in_cloud, sample_radius, nodes, correspondences);
 };
+
+
+/*
+inline bool fast_poisson_disk_sampling(Eigen::MatrixXd & in_cloud, double minimum_distance, Eigen::MatrixXd & out_cloud)
+{
+    // Considering implementing the following paper as an alternative:
+    // https://www.cs.ubc.ca/~rbridson/docs/bridson-siggraph07-poissondisk.pdf
+    int number_of_samples_to_consider = 30;
+
+    // generate the 3D grid
+
+}
+*/
 
 #endif
