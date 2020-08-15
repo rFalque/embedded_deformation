@@ -47,6 +47,13 @@ int main(int argc, char* argv[])
 
     igl::readPLY(opts.path_input_file ,V, F);
 
+    // check for error
+    if (opts.use_geodesic and F.rows() == 0)
+    {
+        std::cout << "Config file error: use_geodesic = true, but nor faces were provided." <<std::endl;
+        exit(-1);
+    }
+
     if (opts.visualization)
         if (F.rows() != 0)
             visualization::plot_mesh(V,F);
