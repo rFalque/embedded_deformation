@@ -17,6 +17,7 @@
 #include <algorithm>
 
 #include "getMinMax.hpp"
+#include "farther_sampling.hpp"
 #include "nanoflannWrapper.hpp"
 
 using namespace std;
@@ -107,23 +108,25 @@ inline void voxel_grid_downsampling(Eigen::MatrixXd & in_cloud, Eigen::MatrixXd 
 
 };
 
-inline void downsampling(Eigen::MatrixXd & in_cloud, Eigen::MatrixXd & out_cloud, std::vector<int> & in_cloud_samples, double grid_resolution)
+inline void downsampling(Eigen::MatrixXd & in_cloud, Eigen::MatrixXd & out_cloud, std::vector<int> & in_cloud_samples, double grid_resolution, bool use_farthest_sampling)
 {
-	Eigen::MatrixXd voxel_grid_downsampled_cloud;
-	voxel_grid_downsampling( in_cloud, voxel_grid_downsampled_cloud, grid_resolution);
+	Eigen::MatrixXd downsampled_cloud;
+	if (use_farthest_sampling)
+		farthest_sampling_by_sphere(in_cloud, grid_resolution, downsampled_cloud);
+	else
+		voxel_grid_downsampling( in_cloud, downsampled_cloud, grid_resolution);
 
-    out_cloud.resize(voxel_grid_downsampled_cloud.rows(), 3);
+	out_cloud.resize(downsampled_cloud.rows(), 3);
 
 	nanoflann_wrapper tree(in_cloud);
-	for (int i = 0; i < voxel_grid_downsampled_cloud.rows(); ++i)
+	for (int i = 0; i < downsampled_cloud.rows(); ++i)
 	{
 		std::vector< int > closest_point;
-		closest_point = tree.return_k_closest_points(voxel_grid_downsampled_cloud.row(i), 1);
+		closest_point = tree.return_k_closest_points(downsampled_cloud.row(i), 1);
 
 		out_cloud.row(i) = in_cloud.row( closest_point[0] );
 		in_cloud_samples.push_back(closest_point[0]);
 	}
-
 };
 
 #endif

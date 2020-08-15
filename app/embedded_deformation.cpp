@@ -64,9 +64,11 @@ int main(int argc, char* argv[])
     else /* graph not provided */
     {
         if (opts.use_geodesic)
-            non_rigid_deformation = new embedded_deformation(V, F, opts.grid_resolution, opts.k);
+            non_rigid_deformation = new embedded_deformation(V, F, opts);
+            //non_rigid_deformation = new embedded_deformation(V, F, opts.grid_resolution, opts.graph_connectivity);
         else /* use knn distance */
-            non_rigid_deformation = new embedded_deformation(V, opts.grid_resolution, opts.k);
+            non_rigid_deformation = new embedded_deformation(V, opts);
+            //non_rigid_deformation = new embedded_deformation(V, opts.grid_resolution, opts.graph_connectivity);
     }
 
     if (opts.visualization)

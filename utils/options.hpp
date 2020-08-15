@@ -17,11 +17,21 @@ struct options
     bool   verbose;
     bool   graph_provided;
 
+    // embedded deformation deformation graph
     bool   use_geodesic;
     bool   use_mesh;
-    int    k;
+    bool   use_farthest_sampling;
+    bool   use_voxel_grid_sampling;
+    int    graph_connectivity;
     double grid_resolution;
 
+    // embedded deformation parameters
+    double w_rot = 1;
+	double w_reg = 10;
+	double w_rig = 10;
+	double w_con = 100;
+
+    // visualization parameters
     double nodes_ratio;
     double edges_ratio;
     double graph_res;
@@ -51,7 +61,11 @@ struct options
         std::cout << "*** Embedded deformation parameters ***" << std::endl;
         std::cout << "use_geodesic: " << use_geodesic << std::endl;
         std::cout << "use_mesh: " << use_mesh << std::endl;
-        std::cout << "k: " << k << std::endl;
+        std::cout << "graph_connectivity: " << graph_connectivity << std::endl;
+        std::cout << "w_rot: " << w_rot << std::endl;
+        std::cout << "w_reg: " << w_reg << std::endl;
+        std::cout << "w_rig: " << w_rig << std::endl;
+        std::cout << "w_con: " << w_con << std::endl;
         std::cout << "grid_resolution: " << grid_resolution << std::endl;
         std::cout << std::endl;
         std::cout << std::endl;
@@ -75,8 +89,14 @@ struct options
         // embedded deformation parameters
         use_geodesic                    = config["embedded_deformation"]["use_geodesic"].as<bool>();
         use_mesh                        = config["embedded_deformation"]["use_mesh"].as<bool>();
-        k                               = config["embedded_deformation"]["k"].as<int>();
+        graph_connectivity              = config["embedded_deformation"]["graph_connectivity"].as<int>();
+        w_rot                           = config["embedded_deformation"]["w_rot"].as<double>();
+        w_reg                           = config["embedded_deformation"]["w_reg"].as<double>();
+        w_rig                           = config["embedded_deformation"]["w_rig"].as<double>();
+        w_con                           = config["embedded_deformation"]["w_con"].as<double>();
         grid_resolution                 = config["embedded_deformation"]["grid_resolution"].as<double>();
+        use_farthest_sampling           = config["embedded_deformation"]["use_farthest_sampling"].as<bool>();
+        use_voxel_grid_sampling         = config["embedded_deformation"]["use_voxel_grid_sampling"].as<bool>();
 
         // visualization parameters
         nodes_ratio                     = config["visualization_params"]["nodes_ratio"].as<double>();
@@ -91,6 +111,14 @@ struct options
             std::cout << "A mesh is required to compute the geodesic distance (edit the use_geodesic in the flag file or provide a mesh as an input)." <<std::endl;
             exit(-1);
         }
+
+        // check for error
+        if (use_farthest_sampling and use_voxel_grid_sampling)
+        {
+            std::cout << "The config file should chose between use_farthest_sampling and use_voxel_grid_sampling." <<std::endl;
+            exit(-1);
+        }
+
 
         if (verbose)
             print();

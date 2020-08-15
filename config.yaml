@@ -26,14 +26,26 @@ embedded_deformation:
   # if true: load mesh; else: load pointCloud;
   use_mesh: true
 
-  # 
+  # needs the previous flag set as true 
   use_geodesic: true
 
+  # if use_farthest_sampling is not true, use voxel grid downsampling for creating the deformation graph 
+  use_farthest_sampling: false
+  use_voxel_grid_sampling: true
+  use_relative_sampling: false
+  node_distance: 0.1
+
   # 
-  k: 5
+  graph_connectivity: 5
 
   # grid_resolution: 18.0
   grid_resolution: 40.0
+
+  # cost function weights
+  w_rot: 1
+  w_reg: 10
+  w_rig: 10
+  w_con: 100
 
 visualization_params:
   nodes_ratio: 50.0

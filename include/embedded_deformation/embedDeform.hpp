@@ -34,10 +34,19 @@ public:
 						 double grid_resolution,
 						 int k);
 
+	embedded_deformation(Eigen::MatrixXd V_in, 
+						 Eigen::MatrixXi F_in,
+						 options opts);
+
 	// provide only a point cloud
 	embedded_deformation(Eigen::MatrixXd V_in, 
 						 double grid_resolution,
 						 int k);
+
+	embedded_deformation(Eigen::MatrixXd V_in, 
+						 options opts);
+
+	// destructor
 	~embedded_deformation(){
 	}
 
@@ -46,14 +55,15 @@ public:
 
 private:
 	// by order of appearance:
-	const double w_rot_ = 1;
-	const double w_reg_ = 10;
-	const double w_rig_ = 10;
-	const double w_con_ = 100;
+	double w_rot_ = 1;
+	double w_reg_ = 10;
+	double w_rig_ = 10;
+	double w_con_ = 100;
 
 	// options
 	bool use_knn_;
 	bool use_dijkstra_;
+	bool use_farthest_sampling_ = false;
 	bool verbose_;
 	int nodes_connectivity_;
 

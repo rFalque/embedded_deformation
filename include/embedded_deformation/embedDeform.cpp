@@ -43,7 +43,7 @@ embedded_deformation::embedded_deformation(Eigen::MatrixXd V_in,
 	use_dijkstra_ = false;
 	
 	// extract point cloud
-	nodes_connectivity_ = opts.k;
+	nodes_connectivity_ = opts.graph_connectivity;
 	verbose_ = opts.verbose;
 
 	// save the data
@@ -55,7 +55,7 @@ embedded_deformation::embedded_deformation(Eigen::MatrixXd V_in,
 
 embedded_deformation::embedded_deformation(Eigen::MatrixXd V_in, Eigen::MatrixXi F_in,
 											double grid_resolution,
-											int nodes_connectivity)
+											int graph_connectivity)
 {
 	std::cout << "use geodesic distance to look for closest point\n";
 
@@ -63,13 +63,56 @@ embedded_deformation::embedded_deformation(Eigen::MatrixXd V_in, Eigen::MatrixXi
 	verbose_ = true;
 	use_knn_ = false;
 	use_dijkstra_ = true;
-	nodes_connectivity_ = nodes_connectivity;
+	nodes_connectivity_ = graph_connectivity;
 	V_ = V_in;
 	F_ = F_in;
 
 	// define nodes as subset
 	Eigen::MatrixXd N;
-	downsampling(V_, N, indexes_of_deformation_graph_in_V_, grid_resolution);
+	downsampling(V_, N, indexes_of_deformation_graph_in_V_, grid_resolution, use_farthest_sampling_);
+
+	// define edges
+	Eigen::MatrixXi E(N.rows()*(nodes_connectivity_+1), 2);
+	greedy_search search_object(V_, F_, indexes_of_deformation_graph_in_V_);
+    std::vector<int> closest_points;
+	int counter = 0;
+    for (int i = 0; i < N.rows(); ++i) {
+		closest_points = search_object.return_k_closest_points( indexes_of_deformation_graph_in_V_[i], nodes_connectivity_+2 );
+		closest_points.erase( closest_points.begin() );
+
+		for (int j=0; j< closest_points.size(); j++) {
+			E(counter, 0) = i;
+			E(counter, 1) = closest_points[j];
+			counter ++;
+		}
+    }
+	
+	// define deformation graph
+	deformation_graph = new libgraphcpp::Graph(N, E);
+}
+
+embedded_deformation::embedded_deformation(Eigen::MatrixXd V_in, Eigen::MatrixXi F_in,
+										   options opts)
+{
+	std::cout << "use geodesic distance to look for closest point\n";
+
+	// set up class variables
+	verbose_ = true;
+	use_knn_ = false;
+	use_dijkstra_ = true;
+	nodes_connectivity_ = opts.graph_connectivity;
+	use_farthest_sampling_ = opts.use_farthest_sampling;
+	V_ = V_in;
+	F_ = F_in;
+
+	w_rot_ = opts.w_rot;
+	w_reg_ = opts.w_reg;
+	w_rig_ = opts.w_rig;
+	w_con_ = opts.w_con;
+
+	// define nodes as subset
+	Eigen::MatrixXd N;
+	downsampling(V_, N, indexes_of_deformation_graph_in_V_, opts.grid_resolution, use_farthest_sampling_);
 
 	// define edges
 	Eigen::MatrixXi E(N.rows()*(nodes_connectivity_+1), 2);
@@ -107,7 +150,49 @@ embedded_deformation::embedded_deformation(Eigen::MatrixXd V_in,
 
 	// extract point cloud
 	Eigen::MatrixXd N;
-	downsampling(V_, N, indexes_of_deformation_graph_in_V_, grid_resolution);
+	downsampling(V_, N, indexes_of_deformation_graph_in_V_, grid_resolution, use_farthest_sampling_);
+
+	// build edges:
+	Eigen::MatrixXi E(N.rows()*(nodes_connectivity_+1), 2);
+	nanoflann_wrapper tree_2(N);
+	int counter = 0;
+	for (int i = 0; i < N.rows(); ++i) {
+		std::vector< int > closest_points;
+		closest_points = tree_2.return_k_closest_points(N.row(i), nodes_connectivity_+ 2 );
+
+		for (int j = 0; j < closest_points.size(); ++j)
+			if (i != closest_points[j]) {
+				E(counter, 0) = i;
+				E(counter, 1) = closest_points[j];
+				counter ++;
+			}
+	}
+
+	deformation_graph = new libgraphcpp::Graph(N, E);
+}
+
+
+embedded_deformation::embedded_deformation(Eigen::MatrixXd V_in,
+										   options opts)
+{
+	std::cout << "use knn to look for closest point\n";
+
+	// set up class variables
+	verbose_ = true;
+	use_knn_ = true;
+	use_dijkstra_ = false;
+	nodes_connectivity_ = opts.graph_connectivity;
+	use_farthest_sampling_ = opts.use_farthest_sampling;
+	V_ = V_in;
+
+	w_rot_ = opts.w_rot;
+	w_reg_ = opts.w_reg;
+	w_rig_ = opts.w_rig;
+	w_con_ = opts.w_con;
+
+	// extract point cloud
+	Eigen::MatrixXd N;
+	downsampling(V_, N, indexes_of_deformation_graph_in_V_, opts.grid_resolution, use_farthest_sampling_);
 
 	// build edges:
 	Eigen::MatrixXi E(N.rows()*(nodes_connectivity_+1), 2);
@@ -253,9 +338,9 @@ void embedded_deformation::deform(Eigen::MatrixXd sources, Eigen::MatrixXd targe
 	options.gradient_check_relative_precision = 0.01;
 	options.minimizer_progress_to_stdout = verbose_;
 	options.num_threads = 1;
-	options.max_num_iterations = 200;
-	options.function_tolerance = 1e-20;
-	options.parameter_tolerance = 1e-20;
+	options.max_num_iterations = 100;
+	options.function_tolerance = 1e-10;
+	options.parameter_tolerance = 1e-10;
 	ceres::Solver::Summary summary;
 	Solve(options, &problem, &summary);
 
