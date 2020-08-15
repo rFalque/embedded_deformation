@@ -116,7 +116,7 @@ inline void downsampling(Eigen::MatrixXd & in_cloud, Eigen::MatrixXd & out_cloud
 	{
 		Eigen::VectorXi correspondences;
 		double scale;
-        getScale(in_cloud, scale);
+		getScale(in_cloud, scale);
 		double sample_radius = scale / grid_resolution / 100; // the /100 makes downsampling with voxel grid and farthest sampling comparable
 		farthest_sampling_by_sphere(in_cloud, sample_radius, downsampled_cloud);
 	}
@@ -137,32 +137,6 @@ inline void downsampling(Eigen::MatrixXd & in_cloud, Eigen::MatrixXd & out_cloud
 		in_cloud_samples.push_back(closest_point[0]);
 	}
 
-	std::cout << "Number of nodes: " << out_cloud.rows() << std::endl;
-
 };
-
-
-/*
-inline void downsampling(Eigen::MatrixXd & in_cloud, Eigen::MatrixXd & out_cloud, std::vector<int> & in_cloud_samples, double grid_resolution, bool use_farthest_sampling)
-{
-	Eigen::MatrixXd downsampled_cloud;
-	if (use_farthest_sampling)
-		farthest_sampling_by_sphere(in_cloud, grid_resolution, downsampled_cloud);
-	else
-		voxel_grid_downsampling( in_cloud, downsampled_cloud, grid_resolution);
-
-	out_cloud.resize(downsampled_cloud.rows(), 3);
-
-	nanoflann_wrapper tree(in_cloud);
-	for (int i = 0; i < downsampled_cloud.rows(); ++i)
-	{
-		std::vector< int > closest_point;
-		closest_point = tree.return_k_closest_points(downsampled_cloud.row(i), 1);
-
-		out_cloud.row(i) = in_cloud.row( closest_point[0] );
-		in_cloud_samples.push_back(closest_point[0]);
-	}
-};
-*/
 
 #endif
