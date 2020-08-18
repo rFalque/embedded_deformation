@@ -37,20 +37,17 @@ public:
 	int occurence;
 };
 
-inline void voxel_grid_downsampling(Eigen::MatrixXd & in_cloud, Eigen::MatrixXd & out_cloud, double grid_resolution)
+inline void voxel_grid_downsampling(Eigen::MatrixXd & in_cloud, double leaf_size, Eigen::MatrixXd & out_cloud)
 {
 	Eigen::Vector3d min_point, max_point;
 	getMinMax(in_cloud, min_point, max_point);
 
-	double box_size = (max_point - min_point).norm();
-
-	Eigen::Vector3d leaf_size, inv_leaf_size;
-	leaf_size << box_size/grid_resolution, box_size/grid_resolution, box_size/grid_resolution;
-	inv_leaf_size << 1.0/leaf_size(0), 1.0/leaf_size(1), 1.0/leaf_size(2);
+	double inv_leaf_size;
+	inv_leaf_size = 1.0/leaf_size;
 
 	Eigen::Vector3i min_box, max_box;
-	min_box << floor(min_point(0) * inv_leaf_size(0) ), floor(min_point(1) * inv_leaf_size(1) ) , floor(min_point(2) * inv_leaf_size(2) ); 
-	max_box << floor(max_point(0) * inv_leaf_size(0) ), floor(max_point(1) * inv_leaf_size(1) ) , floor(max_point(2) * inv_leaf_size(2) ); 
+	min_box << floor(min_point(0) * inv_leaf_size ), floor(min_point(1) * inv_leaf_size ), floor(min_point(2) * inv_leaf_size); 
+	max_box << floor(max_point(0) * inv_leaf_size ), floor(max_point(1) * inv_leaf_size ), floor(max_point(2) * inv_leaf_size); 
 
     Eigen::Vector3i divb, divb_mul;
     divb << max_box(0) - min_box(0) + 1, max_box(1) - min_box(1) + 1, max_box(2) - min_box(2) + 1;
@@ -71,9 +68,9 @@ inline void voxel_grid_downsampling(Eigen::MatrixXd & in_cloud, Eigen::MatrixXd 
 	// plus assign zeros to voxel_count
 	for (int i = 0; i < in_cloud.rows(); ++i)
 	{
-        int x_index = static_cast<int> ( floor(in_cloud(i, 0) * inv_leaf_size(0)) - min_box(0) );
-        int y_index = static_cast<int> ( floor(in_cloud(i, 1) * inv_leaf_size(1)) - min_box(1) );
-        int z_index = static_cast<int> ( floor(in_cloud(i, 2) * inv_leaf_size(2)) - min_box(2) );
+        int x_index = static_cast<int> ( floor(in_cloud(i, 0) * inv_leaf_size) - min_box(0) );
+        int y_index = static_cast<int> ( floor(in_cloud(i, 1) * inv_leaf_size) - min_box(1) );
+        int z_index = static_cast<int> ( floor(in_cloud(i, 2) * inv_leaf_size) - min_box(2) );
 
         voxels[x_index][y_index][z_index].x += in_cloud(i,0);
         voxels[x_index][y_index][z_index].y += in_cloud(i,1);
@@ -109,20 +106,30 @@ inline void voxel_grid_downsampling(Eigen::MatrixXd & in_cloud, Eigen::MatrixXd 
 };
 
 
-inline void downsampling(Eigen::MatrixXd & in_cloud, Eigen::MatrixXd & out_cloud, std::vector<int> & in_cloud_samples, double grid_resolution, bool use_farthest_sampling)
+inline void downsampling(Eigen::MatrixXd & in_cloud, 
+                         Eigen::MatrixXd & out_cloud, 
+						 std::vector<int> & in_cloud_samples, 
+						 double grid_resolution,
+						 double leaf_size, 
+						 bool use_farthest_sampling, 
+						 bool use_relative_grid)
 {
+	// overwrite the leaf_size
+	if (use_relative_grid) {
+		double scale;
+		getScale(in_cloud, scale);
+		leaf_size = scale / grid_resolution;
+	}
+
+	// downsampling
 	Eigen::MatrixXd downsampled_cloud;
 	if (use_farthest_sampling)
 	{
-		Eigen::VectorXi correspondences;
-		double scale;
-		getScale(in_cloud, scale);
-		double sample_radius = scale / grid_resolution / 100; // the /100 makes downsampling with voxel grid and farthest sampling comparable
-		farthest_sampling_by_sphere(in_cloud, sample_radius, downsampled_cloud);
+		farthest_sampling_by_sphere(in_cloud, leaf_size/100, downsampled_cloud);
 	}
 	else
 	{
-		voxel_grid_downsampling( in_cloud, downsampled_cloud, grid_resolution);
+		voxel_grid_downsampling(in_cloud, leaf_size, downsampled_cloud);
 	}
 
 	out_cloud.resize(downsampled_cloud.rows(), 3);

@@ -69,7 +69,8 @@ embedded_deformation::embedded_deformation(Eigen::MatrixXd V_in, Eigen::MatrixXi
 
 	// define nodes as subset
 	Eigen::MatrixXd N;
-	downsampling(V_, N, indexes_of_deformation_graph_in_V_, grid_resolution, use_farthest_sampling_);
+	//downsampling(V_, N, indexes_of_deformation_graph_in_V_, grid_resolution, 0, false, true);
+	downsampling(V_, N, indexes_of_deformation_graph_in_V_, grid_resolution, 0, use_farthest_sampling_, true);
 
 	// define edges
 	Eigen::MatrixXi E(N.rows()*(nodes_connectivity_+1), 2);
@@ -112,7 +113,10 @@ embedded_deformation::embedded_deformation(Eigen::MatrixXd V_in, Eigen::MatrixXi
 
 	// define nodes as subset
 	Eigen::MatrixXd N;
-	downsampling(V_, N, indexes_of_deformation_graph_in_V_, opts.grid_resolution, use_farthest_sampling_);
+	//downsampling(V_, N, indexes_of_deformation_graph_in_V_, opts.grid_resolution, use_farthest_sampling_);
+	downsampling(V_, N, indexes_of_deformation_graph_in_V_, 
+	             opts.grid_resolution, opts.grid_size, 
+				 opts.use_farthest_sampling, opts.use_relative);
 
 	// define edges
 	Eigen::MatrixXi E(N.rows()*(nodes_connectivity_+1), 2);
@@ -150,7 +154,8 @@ embedded_deformation::embedded_deformation(Eigen::MatrixXd V_in,
 
 	// extract point cloud
 	Eigen::MatrixXd N;
-	downsampling(V_, N, indexes_of_deformation_graph_in_V_, grid_resolution, use_farthest_sampling_);
+	//downsampling(V_, N, indexes_of_deformation_graph_in_V_, grid_resolution, use_farthest_sampling_);
+	downsampling(V_, N, indexes_of_deformation_graph_in_V_, grid_resolution, 0, use_farthest_sampling_, true);
 
 	// build edges:
 	Eigen::MatrixXi E(N.rows()*(nodes_connectivity_+1), 2);
@@ -192,7 +197,9 @@ embedded_deformation::embedded_deformation(Eigen::MatrixXd V_in,
 
 	// extract point cloud
 	Eigen::MatrixXd N;
-	downsampling(V_, N, indexes_of_deformation_graph_in_V_, opts.grid_resolution, use_farthest_sampling_);
+	downsampling(V_, N, indexes_of_deformation_graph_in_V_, 
+	             opts.grid_resolution, opts.grid_size, 
+				 opts.use_farthest_sampling, opts.use_relative);
 
 	// build edges:
 	Eigen::MatrixXi E(N.rows()*(nodes_connectivity_+1), 2);
