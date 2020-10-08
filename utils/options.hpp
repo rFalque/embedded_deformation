@@ -129,5 +129,7 @@ struct options
 
         if (verbose)
             print();
+        
+        return true;
     }
 };
