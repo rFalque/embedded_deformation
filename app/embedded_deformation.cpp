@@ -30,9 +30,10 @@ int main(int argc, char* argv[])
 {
     options opts;
     opts.loadYAML("../config.yaml");
-
+std::cout << "Progress: yaml loaded\n";
 
     polyscope::init();
+std::cout << "Progress: plyscope initialized\n";
 
     /* 
      * V: vertex of the surface
@@ -45,7 +46,11 @@ int main(int argc, char* argv[])
     Eigen::MatrixXi F, E;
     embedded_deformation* non_rigid_deformation;
 
+std::cout << "Progress: load file ...";
+
     igl::readPLY(opts.path_input_file ,V, F);
+
+std::cout << " done.\n";
 
     // check for error
     if (opts.use_geodesic and F.rows() == 0)
