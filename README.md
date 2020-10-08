@@ -25,7 +25,6 @@ To build, type into the console:
 ```bash
 git clone https://github.com/rFalque/embedded_deformation.git
 cd embedded_deformation
-git checkout merging_libgraphcpp
 mkdir build
 cd build
 cmake ..
