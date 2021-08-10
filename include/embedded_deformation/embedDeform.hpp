@@ -10,47 +10,48 @@
 #include <ceres/ceres.h>
 #include <ceres/gradient_checker.h>
 
-#include "../utils/options.hpp"
+#include "embedded_deformation/options.hpp"
 
 #include "costFunction.hpp"
 
-#include "libGraphCpp/include/libGraphCpp/graph.hpp"
-#include "libGraphCpp/include/libGraphCpp/plotGraph.hpp"
+#include "libGraphCpp/graph.hpp"
+#include "libGraphCpp/plotGraph.hpp"
 
-class embedded_deformation
+class EmbeddedDeformation
 {
 public:
 
 	// provide the mesh and the graph
-	embedded_deformation(Eigen::MatrixXd V_in, 
+	EmbeddedDeformation(Eigen::MatrixXd V_in, 
 						 Eigen::MatrixXi F_in,
 						 Eigen::MatrixXd N_in, 
 						 Eigen::MatrixXi E_in,
 						 options opts);
 
 	// provide the mesh
-	embedded_deformation(Eigen::MatrixXd V_in, 
+	EmbeddedDeformation(Eigen::MatrixXd V_in, 
 						 Eigen::MatrixXi F_in,
 						 double grid_resolution,
 						 int k);
 
-	embedded_deformation(Eigen::MatrixXd V_in, 
+	EmbeddedDeformation(Eigen::MatrixXd V_in, 
 						 Eigen::MatrixXi F_in,
 						 options opts);
 
 	// provide only a point cloud
-	embedded_deformation(Eigen::MatrixXd V_in, 
+	EmbeddedDeformation(Eigen::MatrixXd V_in, 
 						 double grid_resolution,
 						 int k);
 
-	embedded_deformation(Eigen::MatrixXd V_in, 
+	EmbeddedDeformation(Eigen::MatrixXd V_in, 
 						 options opts);
 
 	// destructor
-	~embedded_deformation(){
+	~EmbeddedDeformation(){
 	}
 
 	void deform(Eigen::MatrixXd sources, Eigen::MatrixXd targets, Eigen::MatrixXd & V_deformed);
+	void update_normals(Eigen::MatrixXd & N);
 	void show_deformation_graph();
 
 private:
