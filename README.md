@@ -37,7 +37,7 @@ make -j3
 
 To run the sample, then just type:
 ```bash
-./embedded_deformation
+./embedded_deformation_sample
 ```
 
 ## Illustration
