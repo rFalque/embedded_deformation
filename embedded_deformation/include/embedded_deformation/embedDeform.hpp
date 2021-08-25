@@ -48,10 +48,11 @@ public:
 
 	// destructor
 	~EmbeddedDeformation(){
+		if(deformation_graph_ptr_ != nullptr) delete deformation_graph_ptr_;
 	}
 
-	void deform(Eigen::MatrixXd sources, Eigen::MatrixXd targets, Eigen::MatrixXd & V_deformed);
-	void update_normals(Eigen::MatrixXd & N);
+	void deform(Eigen::MatrixXd sources_in, Eigen::MatrixXd targets_in, Eigen::MatrixXd & V_deformed);
+	void update_normals(Eigen::MatrixXd & normals);
 	void show_deformation_graph();
 
 private:
@@ -67,11 +68,12 @@ private:
 	bool use_farthest_sampling_ = false;
 	bool verbose_;
 	int nodes_connectivity_;
+	bool transpose_input_and_output_;
 
 	Eigen::MatrixXd V_;
 	Eigen::MatrixXi F_;
 	
-	libgraphcpp::Graph* deformation_graph;
+	libgraphcpp::Graph* deformation_graph_ptr_ = nullptr;;
 
 	// graph properties definition
 	std::vector<Eigen::Matrix3d> rotation_matrices_;

@@ -23,7 +23,7 @@ int argMax(const Eigen::VectorXd & data)
     return argmax;
 }
 
-inline bool farthest_sampling_by_sphere(Eigen::MatrixXd & in_cloud, double sample_radius, Eigen::MatrixXd & nodes, Eigen::VectorXi & correspondences)
+inline bool farthest_sampling_by_sphere(const Eigen::MatrixXd & in_cloud, double sample_radius, Eigen::MatrixXd & nodes, Eigen::VectorXi & correspondences)
 {
 
     correspondences = Eigen::VectorXi::Zero(in_cloud.rows());
@@ -85,7 +85,7 @@ inline bool farthest_sampling_by_sphere(Eigen::MatrixXd & in_cloud, double sampl
 };
 
 // overload the declaration if correspondences are not needed
-inline bool farthest_sampling_by_sphere(Eigen::MatrixXd & in_cloud, double sample_radius, Eigen::MatrixXd & nodes)
+inline bool farthest_sampling_by_sphere(const Eigen::MatrixXd & in_cloud, double sample_radius, Eigen::MatrixXd & nodes)
 {
     Eigen::VectorXi correspondences;
     return farthest_sampling_by_sphere(in_cloud, sample_radius, nodes, correspondences);

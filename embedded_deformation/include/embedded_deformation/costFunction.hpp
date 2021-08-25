@@ -9,7 +9,7 @@ class RigCostFunction: public ceres::CostFunction
 {
 public:
 	// constructor
-	RigCostFunction(double cost_function_weight, Eigen::Vector3d g_j, Eigen::Vector3d g_k){
+	RigCostFunction(double cost_function_weight){
 		// define residual and block_size
 		set_num_residuals(1);
 		std::vector<int>* block_sizes =  mutable_parameter_block_sizes();

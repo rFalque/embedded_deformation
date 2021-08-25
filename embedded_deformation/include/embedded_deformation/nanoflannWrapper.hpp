@@ -19,10 +19,8 @@ private:
 	std::shared_ptr < nanoflann::KDTreeEigenMatrixAdaptor< Eigen::MatrixXd > > kd_tree_index;
 
 public:
-	nanoflann_wrapper(Eigen::MatrixXd target)
+	nanoflann_wrapper(Eigen::MatrixXd target) : target_(target)
 	{
-		target_ = target;
-
 		// set up kdtree
 		int leaf_size=10;
 		int dimensionality=3;

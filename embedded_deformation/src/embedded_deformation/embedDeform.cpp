@@ -39,6 +39,22 @@ EmbeddedDeformation::EmbeddedDeformation(Eigen::MatrixXd V_in,
 										   options opts)
 {
 	std::cout << "embedded deformation constructor: graph provided\n";
+
+	// check the data
+	if (V_in.rows() == 3 && F_in.rows() == 3 && N_in.rows() == 3 && E_in.rows() == 2 ) {
+		V_ = V_in.transpose();
+		F_ = F_in.transpose();
+		deformation_graph_ptr_ = new libgraphcpp::Graph(N_in.transpose(), E_in.transpose());
+		transpose_input_and_output_ = true;
+	} else if (V_in.cols() == 3 && F_in.cols() == 3 && N_in.cols() == 3 && E_in.cols() == 2 ) {		
+		V_ = V_in;
+		F_ = F_in;
+		deformation_graph_ptr_ = new libgraphcpp::Graph(N_in, E_in);
+		transpose_input_and_output_ = false;
+	} else {
+		throw std::invalid_argument( "wrong input size" );
+	}
+	
 	use_knn_ = true;
 	use_dijkstra_ = false;
 	
@@ -46,10 +62,6 @@ EmbeddedDeformation::EmbeddedDeformation(Eigen::MatrixXd V_in,
 	nodes_connectivity_ = opts.graph_connectivity;
 	verbose_ = opts.verbose;
 
-	// save the data
-	V_ = V_in;
-	F_ = F_in;
-	deformation_graph = new libgraphcpp::Graph(N_in, E_in);
 }
 
 
@@ -59,13 +71,24 @@ EmbeddedDeformation::EmbeddedDeformation(Eigen::MatrixXd V_in, Eigen::MatrixXi F
 {
 	std::cout << "use geodesic distance to look for closest point\n";
 
+	// save the data
+	if (V_in.rows() == 3 && F_in.rows() == 3) {
+		V_ = V_in.transpose();
+		F_ = F_in.transpose();
+		transpose_input_and_output_ = true;
+	} else if (V_in.cols() == 3 && F_in.cols() == 3) {		
+		V_ = V_in;
+		F_ = F_in;
+		transpose_input_and_output_ = false;
+	} else {
+		throw std::invalid_argument( "wrong input size" );
+	}
+
 	// set up class variables
 	verbose_ = true;
 	use_knn_ = false;
 	use_dijkstra_ = true;
 	nodes_connectivity_ = graph_connectivity;
-	V_ = V_in;
-	F_ = F_in;
 
 	// define nodes as subset
 	Eigen::MatrixXd N;
@@ -89,7 +112,7 @@ EmbeddedDeformation::EmbeddedDeformation(Eigen::MatrixXd V_in, Eigen::MatrixXi F
     }
 	
 	// define deformation graph
-	deformation_graph = new libgraphcpp::Graph(N, E);
+	deformation_graph_ptr_ = new libgraphcpp::Graph(N, E);
 }
 
 EmbeddedDeformation::EmbeddedDeformation(Eigen::MatrixXd V_in, Eigen::MatrixXi F_in,
@@ -97,14 +120,25 @@ EmbeddedDeformation::EmbeddedDeformation(Eigen::MatrixXd V_in, Eigen::MatrixXi F
 {
 	std::cout << "use geodesic distance to look for closest point\n";
 
+	// save the data
+	if (V_in.rows() == 3 && F_in.rows() == 3) {
+		V_ = V_in.transpose();
+		F_ = F_in.transpose();
+		transpose_input_and_output_ = true;
+	} else if (V_in.cols() == 3 && F_in.cols() == 3) {		
+		V_ = V_in;
+		F_ = F_in;
+		transpose_input_and_output_ = false;
+	} else {
+		throw std::invalid_argument( "wrong input size" );
+	}
+
 	// set up class variables
 	verbose_ = true;
 	use_knn_ = false;
 	use_dijkstra_ = true;
 	nodes_connectivity_ = opts.graph_connectivity;
 	use_farthest_sampling_ = opts.use_farthest_sampling;
-	V_ = V_in;
-	F_ = F_in;
 
 	w_rot_ = opts.w_rot;
 	w_reg_ = opts.w_reg;
@@ -135,7 +169,7 @@ EmbeddedDeformation::EmbeddedDeformation(Eigen::MatrixXd V_in, Eigen::MatrixXi F
     }
 	
 	// define deformation graph
-	deformation_graph = new libgraphcpp::Graph(N, E);
+	deformation_graph_ptr_ = new libgraphcpp::Graph(N, E);
 }
 
 
@@ -145,12 +179,22 @@ EmbeddedDeformation::EmbeddedDeformation(Eigen::MatrixXd V_in,
 {
 	std::cout << "use knn to look for closest point\n";
 
+	// save the data
+	if (V_in.rows() == 3) {
+		V_ = V_in.transpose();
+		transpose_input_and_output_ = true;
+	} else if (V_in.cols() == 3) {		
+		V_ = V_in;
+		transpose_input_and_output_ = false;
+	} else {
+		throw std::invalid_argument( "wrong input size" );
+	}
+
 	// set up class variables
 	verbose_ = true;
 	use_knn_ = true;
 	use_dijkstra_ = false;
 	nodes_connectivity_ = nodes_connectivity;
-	V_ = V_in;
 
 	// extract point cloud
 	Eigen::MatrixXd N;
@@ -173,7 +217,7 @@ EmbeddedDeformation::EmbeddedDeformation(Eigen::MatrixXd V_in,
 			}
 	}
 
-	deformation_graph = new libgraphcpp::Graph(N, E);
+	deformation_graph_ptr_ = new libgraphcpp::Graph(N, E);
 }
 
 
@@ -182,13 +226,23 @@ EmbeddedDeformation::EmbeddedDeformation(Eigen::MatrixXd V_in,
 {
 	std::cout << "use knn to look for closest point\n";
 
+	// save the data
+	if (V_in.rows() == 3) {
+		V_ = V_in.transpose();
+		transpose_input_and_output_ = true;
+	} else if (V_in.cols() == 3) {		
+		V_ = V_in;
+		transpose_input_and_output_ = false;
+	} else {
+		throw std::invalid_argument( "wrong input size" );
+	}
+
 	// set up class variables
 	verbose_ = true;
 	use_knn_ = true;
 	use_dijkstra_ = false;
 	nodes_connectivity_ = opts.graph_connectivity;
 	use_farthest_sampling_ = opts.use_farthest_sampling;
-	V_ = V_in;
 
 	w_rot_ = opts.w_rot;
 	w_reg_ = opts.w_reg;
@@ -217,42 +271,60 @@ EmbeddedDeformation::EmbeddedDeformation(Eigen::MatrixXd V_in,
 			}
 	}
 
-	deformation_graph = new libgraphcpp::Graph(N, E);
+	deformation_graph_ptr_ = new libgraphcpp::Graph(N, E);
 }
 
 
-void EmbeddedDeformation::deform(Eigen::MatrixXd sources, Eigen::MatrixXd targets, Eigen::MatrixXd & V_deformed)
+
+
+
+void EmbeddedDeformation::deform(Eigen::MatrixXd sources_in, Eigen::MatrixXd targets_in, Eigen::MatrixXd & V_deformed)
 {
+	Eigen::MatrixXd sources, targets;
+
+	if (sources_in.cols() == 3 && targets_in.cols() == 3) {		
+		sources = sources_in;
+		targets = targets_in;
+	} else if (sources_in.rows() == 3 && targets_in.rows() == 3) {
+		sources = sources_in.transpose();
+		targets = targets_in.transpose();
+	} else {
+		throw std::invalid_argument( "wrong input size" );
+	}
+
+	if (sources_in.cols() == 3 && targets_in.cols() == 3 && sources_in.rows() == 3 && targets_in.rows() == 3)
+		throw std::invalid_argument( "the system does not work for 3 input points" );
+
 	std::vector< std::vector<int> > sources_nodes_neighbours;
 
 	// declare the greedy_search object
-	greedy_search *search_object;
-	nanoflann_wrapper *tree2;
+	greedy_search *deformation_graph_greedy_search = nullptr;
+	nanoflann_wrapper *deformation_graph_kdtree = nullptr;
 
 	if (use_dijkstra_)
-		search_object = new greedy_search(V_, F_, indexes_of_deformation_graph_in_V_);
+		deformation_graph_greedy_search = new greedy_search(V_, F_, indexes_of_deformation_graph_in_V_);
 	if (use_knn_)
-		tree2 = new nanoflann_wrapper(deformation_graph->get_nodes());
+		deformation_graph_kdtree = new nanoflann_wrapper(deformation_graph_ptr_->get_nodes());
 
 	// set the sources neighbours
     sources_nodes_neighbours.resize(sources.rows());
+	nanoflann_wrapper tree(V_);
 	for (int i = 0; i < sources.rows(); ++i)
 	{
 		// find closest point on the mesh
-		nanoflann_wrapper tree(V_);
 		std::vector< int > closest_point;
 		closest_point = tree.return_k_closest_points(sources.row(i), 1);
 
 		if (use_dijkstra_)
-			sources_nodes_neighbours.at(i) = search_object->return_k_closest_points(closest_point.at(0), nodes_connectivity_+1);
+			sources_nodes_neighbours.at(i) = deformation_graph_greedy_search->return_k_closest_points(closest_point.at(0), nodes_connectivity_+1);
 		if (use_knn_)
-			sources_nodes_neighbours.at(i) = tree2->return_k_closest_points(V_.row(closest_point.at(0)), nodes_connectivity_+1);
+			sources_nodes_neighbours.at(i) = deformation_graph_kdtree->return_k_closest_points(V_.row(closest_point.at(0)), nodes_connectivity_+1);
 	}
 
 	// initialize the parameters that needs to be optimized (nodes rotations and translations)
 	std::vector< std::vector <double> > params;
 
-	params.resize(deformation_graph->num_nodes());
+	params.resize(deformation_graph_ptr_->num_nodes());
 	for (int i = 0; i < params.size(); ++i)
 	{
 		params[i].resize(12);
@@ -277,7 +349,7 @@ void EmbeddedDeformation::deform(Eigen::MatrixXd sources, Eigen::MatrixXd target
 	if (verbose_)
 		std::cout << "progress : add the residuals for RotCostFunction ..." << std::endl;
 		
-	for (int i = 0; i < deformation_graph->num_nodes(); ++i)
+	for (int i = 0; i < deformation_graph_ptr_->num_nodes(); ++i)
 	{
 		//RotCostFunction* cost_function = new RotCostFunction(w_rot_);
 		RotCostFunction_2* cost_function = new RotCostFunction_2(w_rot_);
@@ -287,13 +359,13 @@ void EmbeddedDeformation::deform(Eigen::MatrixXd sources, Eigen::MatrixXd target
 	if (verbose_)
 		std::cout << "progress : add the residuals for RegCostFunction ..." << std::endl;
 
-	for (int i = 0; i < deformation_graph->num_nodes(); ++i)
+	for (int i = 0; i < deformation_graph_ptr_->num_nodes(); ++i)
 	{
-		for (int j = 0; j < deformation_graph->get_adjacency_list(i).size(); ++j)
+		for (int j = 0; j < deformation_graph_ptr_->get_adjacency_list(i).size(); ++j)
 		{
-			int k = deformation_graph->get_adjacency_list(i, j);
-			Eigen::Vector3d g_j = deformation_graph->get_node(i);
-			Eigen::Vector3d g_k = deformation_graph->get_node(k);
+			int k = deformation_graph_ptr_->get_adjacency_list(i, j);
+			Eigen::Vector3d g_j = deformation_graph_ptr_->get_node(i);
+			Eigen::Vector3d g_k = deformation_graph_ptr_->get_node(k);
 			RegCostFunction* cost_function = new RegCostFunction(w_reg_, g_j, g_k);
 
 			// add residual block
@@ -305,13 +377,11 @@ void EmbeddedDeformation::deform(Eigen::MatrixXd sources, Eigen::MatrixXd target
 		std::cout << "progress : add the residuals for RigCostFunction ..." << std::endl;
 
 	std::vector<int> bridges;
-	deformation_graph->has_bridges(bridges);
+	deformation_graph_ptr_->has_bridges(bridges);
 	for (int i=0; i<bridges.size(); i++)
 	{
-		Eigen::Vector2i nodes_list = deformation_graph->get_edge(bridges[i]);
-		Eigen::Vector3d g_j = deformation_graph->get_node(nodes_list(0));
-		Eigen::Vector3d g_k = deformation_graph->get_node(nodes_list(1));
-		RigCostFunction* cost_function = new RigCostFunction(w_rig_, g_j, g_k);
+		Eigen::Vector2i nodes_list = deformation_graph_ptr_->get_edge(bridges[i]);
+		RigCostFunction* cost_function = new RigCostFunction(w_rig_);
 
 		// add residual block
 		problem.AddResidualBlock(cost_function, NULL, &params[nodes_list(0)][0], &params[nodes_list(1)][0]);
@@ -330,7 +400,7 @@ void EmbeddedDeformation::deform(Eigen::MatrixXd sources, Eigen::MatrixXd target
 			parameter_blocks.push_back(&params[ sources_nodes_neighbours[i][j] ][0]);
 
 		for (int j = 0; j < sources_nodes_neighbours[i].size(); ++j)
-			vector_g.push_back( deformation_graph->get_node(sources_nodes_neighbours[i][j]) );
+			vector_g.push_back( deformation_graph_ptr_->get_node(sources_nodes_neighbours[i][j]) );
 
 		// create the cost function
 		ConCostFunction* cost_function = new ConCostFunction(w_con_, vector_g, sources.row(i), targets.row(i));
@@ -355,16 +425,16 @@ void EmbeddedDeformation::deform(Eigen::MatrixXd sources, Eigen::MatrixXd target
 		std::cout << summary.FullReport() << "\n";
 
 	// Extract the optimized parameters
-	rotation_matrices_.resize(deformation_graph->num_nodes());
-	translations_.resize(deformation_graph->num_nodes());
-	for (int i = 0; i < deformation_graph->num_nodes(); ++i)
+	rotation_matrices_.resize(deformation_graph_ptr_->num_nodes());
+	translations_.resize(deformation_graph_ptr_->num_nodes());
+	for (int i = 0; i < deformation_graph_ptr_->num_nodes(); ++i)
 	{
 		rotation_matrices_[i] = Eigen::Map<Eigen::Matrix3d>( &(params[i][0]) );
 		translations_[i] = Eigen::Map<Eigen::Vector3d> ( &(params[i][0]) + 9);
 	}
 
 	// redefine the deformed mesh
-	V_deformed = V_;
+	Eigen::MatrixXd V_temp = V_;
 
 	std::vector<double> w_j;
 	Eigen::Vector3d new_point;
@@ -374,15 +444,15 @@ void EmbeddedDeformation::deform(Eigen::MatrixXd sources, Eigen::MatrixXd target
 
 		// get closest nodes
 		if (use_dijkstra_)
-			neighbours_nodes = search_object->return_k_closest_points(i, nodes_connectivity_+1);
+			neighbours_nodes = deformation_graph_greedy_search->return_k_closest_points(i, nodes_connectivity_+1);
 		if (use_knn_)
-			neighbours_nodes = tree2->return_k_closest_points(V_.row(i), nodes_connectivity_+1);
+			neighbours_nodes = deformation_graph_kdtree->return_k_closest_points(V_.row(i), nodes_connectivity_+1);
 
 		// equation (3)
 		w_j.clear();
 		for (int j = 0; j < nodes_connectivity_; ++j)
-			w_j.push_back( pow(1 - (V_.row(i) - deformation_graph->get_node(   neighbours_nodes[j]   ).transpose() ).squaredNorm() 
-				                 / (V_.row(i) - deformation_graph->get_node( neighbours_nodes.back() ).transpose() ).squaredNorm(), 2) );
+			w_j.push_back( pow(1 - (V_.row(i) - deformation_graph_ptr_->get_node(   neighbours_nodes[j]   ).transpose() ).squaredNorm() 
+				                 / (V_.row(i) - deformation_graph_ptr_->get_node( neighbours_nodes.back() ).transpose() ).squaredNorm(), 2) );
 
 		double normalization_factor = 0;
 		for (int j = 0; j < nodes_connectivity_; ++j)
@@ -393,27 +463,35 @@ void EmbeddedDeformation::deform(Eigen::MatrixXd sources, Eigen::MatrixXd target
 
 		new_point << 0, 0, 0;
 		for (int j = 0; j < nodes_connectivity_; ++j)
-			new_point += w_j[j] * (rotation_matrices_[ neighbours_nodes[j] ] * (V_.row(i).transpose() - deformation_graph->get_node( neighbours_nodes[j] ) ) 
-				                                                           + deformation_graph->get_node( neighbours_nodes[j] ) + translations_[ neighbours_nodes[j] ]);
+			new_point += w_j[j] * (rotation_matrices_[ neighbours_nodes[j] ] * (V_.row(i).transpose() - deformation_graph_ptr_->get_node( neighbours_nodes[j] ) ) 
+				                                                           + deformation_graph_ptr_->get_node( neighbours_nodes[j] ) + translations_[ neighbours_nodes[j] ]);
 
-		V_deformed.row(i) = new_point;
+		V_temp.row(i) = new_point;
 
 	}
+
+	if (transpose_input_and_output_)
+		V_deformed = V_temp.transpose();
+	else
+		V_deformed = V_temp;
+
+	if (deformation_graph_greedy_search != nullptr) delete deformation_graph_greedy_search;
+    if (deformation_graph_kdtree != nullptr) delete deformation_graph_kdtree;
 }
 
 // Equation (3) in Sumner et al
-void EmbeddedDeformation::update_normals(Eigen::MatrixXd & N) {
+void EmbeddedDeformation::update_normals(Eigen::MatrixXd & normals) {
 	
 	// check inputs
 	Eigen::MatrixXd N_input;
-	bool flip_output = false;
+	transpose_input_and_output_ = false;
 
 	// test the input size
-	if (N.rows() == 3) {
-		N_input = N.transpose();
-		flip_output = true;
-	} else if (N.cols() == 3) {		
-		N_input = N;
+	if (normals.rows() == 3) {
+		N_input = normals.transpose();
+		transpose_input_and_output_ = true;
+	} else if (normals.cols() == 3) {		
+		N_input = normals;
 	} else {
 		throw std::invalid_argument( "wrong input size" );
 	}
@@ -428,7 +506,7 @@ void EmbeddedDeformation::update_normals(Eigen::MatrixXd & N) {
 	if (use_dijkstra_)
 		search_object = new greedy_search(V_, F_, indexes_of_deformation_graph_in_V_);
 	if (use_knn_)
-		tree2 = new nanoflann_wrapper(deformation_graph->get_nodes());
+		tree2 = new nanoflann_wrapper(deformation_graph_ptr_->get_nodes());
 
 	std::vector<double> w_j;
 	for (int i = 0; i < V_.rows(); ++i)
@@ -444,8 +522,8 @@ void EmbeddedDeformation::update_normals(Eigen::MatrixXd & N) {
 		// equation (3)
 		w_j.clear();
 		for (int j = 0; j < nodes_connectivity_; ++j)
-			w_j.push_back( pow(1 - (V_.row(i) - deformation_graph->get_node(   neighbours_nodes[j]   ).transpose() ).squaredNorm() 
-				                 / (V_.row(i) - deformation_graph->get_node( neighbours_nodes.back() ).transpose() ).squaredNorm(), 2) );
+			w_j.push_back( pow(1 - (V_.row(i) - deformation_graph_ptr_->get_node(   neighbours_nodes[j]   ).transpose() ).squaredNorm() 
+				                 / (V_.row(i) - deformation_graph_ptr_->get_node( neighbours_nodes.back() ).transpose() ).squaredNorm(), 2) );
 
 		double normalization_factor = 0;
 		for (int j = 0; j < nodes_connectivity_; ++j)
@@ -462,14 +540,14 @@ void EmbeddedDeformation::update_normals(Eigen::MatrixXd & N) {
 
 	}
 
-	if (flip_output) {
-		N = N_input.transpose();
+	if (transpose_input_and_output_) {
+		normals = N_input.transpose();
 	} else {
-		N = N_input;
+		normals = N_input;
 	}
 }
 
 void EmbeddedDeformation::show_deformation_graph()
 {
-	visualization::plot(*deformation_graph, "deformation graph");
+	visualization::plot(*deformation_graph_ptr_, "deformation graph");
 }
