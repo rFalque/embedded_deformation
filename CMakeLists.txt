@@ -7,7 +7,7 @@ FetchContent_Declare(
     polyscope
 
     GIT_REPOSITORY https://github.com/nmwsharp/polyscope.git
-    GIT_TAG        master
+    GIT_TAG        56b82cd
     SOURCE_DIR "${CMAKE_SOURCE_DIR}/polyscope"
 )
 FetchContent_Populate(polyscope)
