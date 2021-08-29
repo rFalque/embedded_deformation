@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.1)
 
 project(embedded_deformation)
 
+# get polyscope
 include(FetchContent)
 FetchContent_Declare(
     polyscope
@@ -10,33 +11,45 @@ FetchContent_Declare(
     GIT_TAG        56b82cd
     SOURCE_DIR "${CMAKE_SOURCE_DIR}/polyscope"
 )
-FetchContent_Populate(polyscope)
+FetchContent_GetProperties(polyscope)
+if(NOT polyscope_POPULATED)
+    message("libGraphCpp: fetch polyscope")
+    FetchContent_Populate(polyscope)
+    add_subdirectory(polyscope)
+endif()
 
+# get utils
 include(FetchContent)
 FetchContent_Declare(
     utils
 
     GIT_REPOSITORY https://github.com/rFalque/utils.git
-    GIT_TAG        master
+    GIT_TAG        7a614f3
     SOURCE_DIR "${CMAKE_SOURCE_DIR}/utils"
 )
-FetchContent_Populate(utils)
+FetchContent_GetProperties(utils)
+if(NOT utils_POPULATED)
+    message("fetch utils")
+    FetchContent_Populate(utils)
+    add_subdirectory(utils)
+endif()
 
+# get libGraphCpp
 FetchContent_Declare(
     libGraphCpp
 
     GIT_REPOSITORY https://github.com/rFalque/libGraphCpp.git
-    GIT_TAG        library
+    GIT_TAG        a0369e0
     SOURCE_DIR "${CMAKE_SOURCE_DIR}/libGraphCpp"
 )
-FetchContent_Populate(libGraphCpp)
+FetchContent_GetProperties(libGraphCpp)
+if(NOT libGraphCpp_POPULATED)
+    message("fetch libGraphCpp")
+    FetchContent_Populate(libGraphCpp)
+    add_subdirectory(libGraphCpp)
+endif()
 
-add_subdirectory(utils)
-add_subdirectory(polyscope)
-add_subdirectory(libGraphCpp)
 add_subdirectory(embedded_deformation)
-
-
 
 set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
