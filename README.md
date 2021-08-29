@@ -1,4 +1,4 @@
-# C++ implementation of the "Embedded Deformation for Shape Manipulation"
+# C++ implementation of: Embedded Deformation for Shape Manipulation
 
 ## What is in this repository?
 This repository contains the C++ implementation of embedded deformation (ED) [[1]](#link-to-the-original-paper). The formulation of the different cost functions used in ED are defined with the associated jacobians. In contrasts to [[1]](#link-to-the-original-paper), the optimization uses [Levenberg-Marquardt](http://ceres-solver.org/nnls_solving.html#levenberg-marquardt) from CERES instead of Gauss-Newton.
