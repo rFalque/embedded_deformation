@@ -34,3 +34,8 @@
 build/
 build_tests/
 .vscode/
+
+# dependencies
+polyscope/
+libGraphCpp/
+utils/
