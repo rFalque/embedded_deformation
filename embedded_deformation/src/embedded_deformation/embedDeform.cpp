@@ -479,6 +479,62 @@ void EmbeddedDeformation::deform(Eigen::MatrixXd sources_in, Eigen::MatrixXd tar
     if (deformation_graph_kdtree != nullptr) delete deformation_graph_kdtree;
 }
 
+
+void EmbeddedDeformation::deform_other_points(Eigen::MatrixXd & V) {
+	Eigen::MatrixXd V_in;
+	if (V.cols() == 3) {		
+		V_in = V;
+	} else if (V.rows() == 3) {
+		V_in = V.transpose();
+	} else {
+		throw std::invalid_argument( "wrong input size" );
+	}
+
+	// declare the greedy_search object
+	nanoflann_wrapper *deformation_graph_kdtree = new nanoflann_wrapper(deformation_graph_ptr_->get_nodes());
+
+	// redefine the deformed mesh
+	Eigen::MatrixXd V_temp = V_in;
+
+	std::vector<double> w_j;
+	Eigen::Vector3d new_point;
+	for (int i = 0; i < V_in.rows(); ++i)
+	{
+		std::vector< int > neighbours_nodes;
+
+		// get closest nodes
+		neighbours_nodes = deformation_graph_kdtree->return_k_closest_points(V_in.row(i), nodes_connectivity_+1);
+
+		// equation (3)
+		w_j.clear();
+		for (int j = 0; j < nodes_connectivity_; ++j)
+			w_j.push_back( pow(1 - (V_in.row(i) - deformation_graph_ptr_->get_node(   neighbours_nodes[j]   ).transpose() ).squaredNorm() 
+				                 / (V_in.row(i) - deformation_graph_ptr_->get_node( neighbours_nodes.back() ).transpose() ).squaredNorm(), 2) );
+
+		double normalization_factor = 0;
+		for (int j = 0; j < nodes_connectivity_; ++j)
+			normalization_factor += w_j[j];
+
+		for (int j = 0; j < nodes_connectivity_; ++j)
+			w_j[j] /= normalization_factor;
+
+		new_point << 0, 0, 0;
+		for (int j = 0; j < nodes_connectivity_; ++j)
+			new_point += w_j[j] * (rotation_matrices_[ neighbours_nodes[j] ] * (V_in.row(i).transpose() - deformation_graph_ptr_->get_node( neighbours_nodes[j] ) ) 
+				                                                           + deformation_graph_ptr_->get_node( neighbours_nodes[j] ) + translations_[ neighbours_nodes[j] ]);
+
+		V_temp.row(i) = new_point;
+
+	}
+
+	if (transpose_input_and_output_)
+		V = V_temp.transpose();
+	else
+		V = V_temp;
+
+    if (deformation_graph_kdtree != nullptr) delete deformation_graph_kdtree;
+}
+
 // Equation (3) in Sumner et al
 void EmbeddedDeformation::update_normals(Eigen::MatrixXd & normals) {
 	

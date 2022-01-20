@@ -52,6 +52,7 @@ public:
 	}
 
 	void deform(Eigen::MatrixXd sources_in, Eigen::MatrixXd targets_in, Eigen::MatrixXd & V_deformed);
+	void deform_other_points(Eigen::MatrixXd & V);
 	void update_normals(Eigen::MatrixXd & normals);
 	void show_deformation_graph();
 
