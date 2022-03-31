@@ -83,7 +83,7 @@ foreach(file_path ${my_c_list})
                         libGraphCpp
                         embedded_deformation
                         ${CERES_LIBRARIES}
-                        ${YAML_CPP_LIBRARIES}
+                        yaml-cpp
                         ${PYTHON_LIBRARIES}
                         )
 
