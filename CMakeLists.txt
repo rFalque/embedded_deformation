@@ -24,7 +24,7 @@ FetchContent_Declare(
     utils
 
     GIT_REPOSITORY https://github.com/rFalque/utils.git
-    GIT_TAG        7a614f3
+    GIT_TAG        5839d17
     SOURCE_DIR "${CMAKE_SOURCE_DIR}/utils"
 )
 FetchContent_GetProperties(utils)
