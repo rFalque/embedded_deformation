@@ -1,18 +1,27 @@
 # input output file path data
 io_files:
-  input_ply: "../data/input.ply"
-  pointwise_correspondence: "../data/FAUST_dabing.csv"
+  # input_ply: "../data/input.ply"
+  # pointwise_correspondence: "../data/FAUST_dabing.csv"
+  principal_x: 320.0
+  principal_y: 240.0
+  focal_x: 570.0
+  focal_y: 570.0
+  width: 640
+  height: 480
+  start_frame: 100
+  image_path: "../datasets/boxingMask"
+
   
   # for cases where the graph is provided
   # pointwise_correspondence: "../data/drill_rotation.csv"
-  input_obj: "../data/graphs_test/surface_to_deform.obj"
+  # input_obj: "../data/graphs_test/surface_to_deform.obj"
   #graph_obj: "../data/graphs_test/0_graph_complete.obj"
   #graph_obj: "../data/graphs_test/1_graph_complete_smaller.obj"
   #graph_obj: "../data/graphs_test/3_1_node_connectetivity.obj"
-  graph_obj: "../data/graphs_test/4_1_edge_connectetivity.obj"
+  # graph_obj: "../data/graphs_test/4_1_edge_connectetivity.obj"
   #graph_obj: "../data/graphs_test/5_2_edge_connectetivity.obj"
    
-  output_ply: "../data/output.ply"
+  # output_ply: "../data/output.ply"
 
 general_params:
   verbose: true         # enable / disable the output (true / false)

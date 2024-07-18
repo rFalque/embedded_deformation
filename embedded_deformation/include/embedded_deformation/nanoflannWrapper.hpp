@@ -43,7 +43,7 @@ public:
 			query_pt.push_back( query_point(d) );
 
 		// set wtf vectors
-		std::vector<size_t> ret_indexes(k);
+		std::vector<size_t> ret_indexes(k);                   
 		std::vector<double> out_dists_sqr(k);
 		nanoflann::KNNResultSet<double> resultSet(k);
 		resultSet.init( &ret_indexes.at(0), &out_dists_sqr.at(0) );

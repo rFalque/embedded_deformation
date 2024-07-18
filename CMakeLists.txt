@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(embedded_deformation)
-
+project(embedded_deformation LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON) 
+set(CMAKE_CXX_EXTENSIONS OFF) 
 # get polyscope
 include(FetchContent)
 FetchContent_Declare(
@@ -48,6 +50,10 @@ if(NOT libGraphCpp_POPULATED)
     FetchContent_Populate(libGraphCpp)
     add_subdirectory(libGraphCpp)
 endif()
+find_package(CUDA REQUIRED)
+find_package(PCL REQUIRED)
+include_directories(${CUDA_INCLUDE_DIRS})
+include_directories(${PCL_INCLUDE_DIRS})
 
 add_subdirectory(embedded_deformation)
 
@@ -59,8 +65,8 @@ find_package(Eigen3 REQUIRED)
 
 # yaml-cpp if not found, run sudo apt-get install libyaml-cpp-dev
 find_package(yaml-cpp REQUIRED)
-
 find_package(Ceres REQUIRED)
+
 
 
 file(GLOB_RECURSE my_c_list RELATIVE ${CMAKE_SOURCE_DIR} "app/*")
@@ -75,6 +81,7 @@ foreach(file_path ${my_c_list})
                         ${YAML_CPP_INCLUDE_DIR}
                         ${CERES_INCLUDE_DIRS}
                         ${PYTHON_INCLUDE_DIRS}
+                        ${CMAKE_SOURCE_DIR}/embedded_deformation/include
                         )
 
     target_link_libraries(${filename}

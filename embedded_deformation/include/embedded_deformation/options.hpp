@@ -7,11 +7,16 @@
 struct options
 {
     /* data */
-    std::string path_pairwise_correspondence;
+    // std::string path_pairwise_correspondence;
     std::string path_input_file;
-    std::string path_output_file;
+    // std::string path_output_file;
     std::string path_input_obj;
     std::string path_graph_obj;
+    float principal_x, principal_y, focal_x, focal_y;
+    unsigned width, height;
+    int start_frame;
+    std::string image_path;
+
 
     bool   visualization;
     bool   verbose;
@@ -53,8 +58,8 @@ struct options
         {
             std::cout <<  "path_input_file: " << path_input_file << std::endl;
         }
-        std::cout << "path_output_file: " << path_output_file << std::endl;
-        std::cout << "path_pairwise_correspondence: " << path_pairwise_correspondence << std::endl;
+        // std::cout << "path_output_file: " << path_output_file << std::endl;
+        // std::cout << "path_pairwise_correspondence: " << path_pairwise_correspondence << std::endl;
         std::cout << std::endl;
         std::cout << "*** General parameters ***" << std::endl;
         std::cout << "visualization: " << visualization << std::endl;
@@ -81,11 +86,19 @@ struct options
         YAML::Node config = YAML::LoadFile(config_file);
         
         // IO
-        path_input_file                 = config["io_files"]["input_ply"].as<std::string>();
-        path_output_file                = config["io_files"]["output_ply"].as<std::string>();
-        path_input_obj                  = config["io_files"]["input_obj"].as<std::string>();
-        path_graph_obj                  = config["io_files"]["graph_obj"].as<std::string>();
-        path_pairwise_correspondence    = config["io_files"]["pointwise_correspondence"].as<std::string>();
+        // path_input_file                 = config["io_files"]["input_ply"].as<std::string>();
+        // path_output_file                = config["io_files"]["output_ply"].as<std::string>();
+        principal_x                     = config["io_files"]["principal_x"].as<float>();
+        principal_y                     = config["io_files"]["principal_y"].as<float>();
+        focal_x                         = config["io_files"]["focal_x"].as<float>();
+        focal_y                         = config["io_files"]["focal_y"].as<float>();
+        width                           = config["io_files"]["width"].as<unsigned>();
+        height                          = config["io_files"]["height"].as<unsigned>();
+        image_path                      = config["io_files"]["image_path"].as<std::string>();
+        start_frame                     = config["io_files"]["start_frame"].as<int>();
+        // path_input_obj                  = config["io_files"]["input_obj"].as<std::string>();
+        // path_graph_obj                  = config["io_files"]["graph_obj"].as<std::string>();
+        // path_pairwise_correspondence    = config["io_files"]["pointwise_correspondence"].as<std::string>();
 
         // general options
         visualization                   = config["general_params"]["visualization"].as<bool>();

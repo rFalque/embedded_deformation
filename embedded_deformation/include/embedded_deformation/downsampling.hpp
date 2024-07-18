@@ -116,8 +116,9 @@ inline void downsampling(Eigen::MatrixXd & in_cloud,
 {
 	// overwrite the leaf_size
 	if (use_relative_grid) {
+		std::cout<<"use relative grid"<<std::endl;
 		double scale;
-		getScale(in_cloud, scale);
+		getScale(in_cloud, scale);                          // 计算一个能包含所有点云的最小立方体的对角线长度
 		leaf_size = scale / grid_resolution;
 	}
 
@@ -135,13 +136,14 @@ inline void downsampling(Eigen::MatrixXd & in_cloud,
 	out_cloud.resize(downsampled_cloud.rows(), 3);
 
 	nanoflann_wrapper tree(in_cloud);
-	for (int i = 0; i < downsampled_cloud.rows(); ++i)
+	// 在in_cloud中找到downsampled_cloud中每个点的最近邻
+	for (int i = 0; i < downsampled_cloud.rows(); ++i)                                 // 遍历所有采样点
 	{
 		std::vector< int > closest_point;
 		closest_point = tree.return_k_closest_points(downsampled_cloud.row(i), 1);
 
-		out_cloud.row(i) = in_cloud.row( closest_point[0] );
-		in_cloud_samples.push_back(closest_point[0]);
+		out_cloud.row(i) = in_cloud.row( closest_point[0] );                          // 将in_cloud中的最近邻点赋值给out_cloud
+		in_cloud_samples.push_back(closest_point[0]);                                 // 记录in_cloud中的最近邻点的索引
 	}
 
 };

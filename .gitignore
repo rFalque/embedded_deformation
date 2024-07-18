@@ -39,3 +39,6 @@ build_tests/
 polyscope/
 libGraphCpp/
 utils/
+datasets/
+images/
+result/

@@ -1,9 +1,3 @@
-/*
-*   embedded deformation implementation
-*   by R. Falque
-*   14/11/2018
-*/
-
 #ifndef EMBEDDED_DEFORMATION
 #define EMBEDDED_DEFORMATION
 
@@ -44,6 +38,7 @@ public:
 						 int k);
 
 	EmbeddedDeformation(Eigen::MatrixXd V_in, 
+						Eigen::MatrixXd normal_in,
 						 options opts);
 
 	// destructor
@@ -51,7 +46,7 @@ public:
 		if(deformation_graph_ptr_ != nullptr) delete deformation_graph_ptr_;
 	}
 
-	void deform(Eigen::MatrixXd sources_in, Eigen::MatrixXd targets_in, Eigen::MatrixXd & V_deformed);
+	void deform(Eigen::MatrixXd sources_in, Eigen::MatrixXd targets_in, Eigen::MatrixXd targets_normal_in, Eigen::MatrixXd & V_deformed, Eigen::MatrixXd & normal_deformed, options opts);
 	void deform_other_points(Eigen::MatrixXd & V);
 	void update_normals(Eigen::MatrixXd & normals);
 	void show_deformation_graph();
@@ -61,7 +56,8 @@ private:
 	double w_rot_ = 1;
 	double w_reg_ = 10;
 	double w_rig_ = 10;
-	double w_con_ = 100;
+	double w_con_ = 1;
+	double w_p2pl_ = 0.1;
 
 	// options
 	bool use_knn_;
@@ -73,6 +69,7 @@ private:
 
 	Eigen::MatrixXd V_;
 	Eigen::MatrixXi F_;
+	Eigen::MatrixXd normal_;
 	
 	libgraphcpp::Graph* deformation_graph_ptr_ = nullptr;;
 

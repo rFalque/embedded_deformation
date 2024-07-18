@@ -22,6 +22,7 @@ public:
 	~RigCostFunction(){
 	}
 
+	// 函数的目标是最小化两个变换之间的差异
 	virtual bool Evaluate(double const* const* parameters,
                           double* residuals,
                           double** jacobians) const
@@ -241,7 +242,7 @@ public:
 	RotCostFunction_2(double cost_function_weight){
 		// define residual and block_size
 		set_num_residuals(9);
-		std::vector<int>* block_sizes =  mutable_parameter_block_sizes();
+		std::vector<int>* block_sizes =  mutable_parameter_block_sizes();          // 在Ceres中，参数块是优化过程中要求解的变量的集合
 		block_sizes->push_back(12);
 
 		cost_function_weight_ = sqrt(cost_function_weight);
@@ -263,7 +264,7 @@ public:
         if (jacobians!=NULL){
             if(jacobians[0]!=NULL){
 
-				//R'*R - I (0,0)
+				//R'*R - I (0,0) R的逆乘R- 单位矩阵 有9个元素 即9个残差 每个残差都对12个参数求导 所以一行雅可比有9*12个元素
 				jacobians[0][ 0] = cost_function_weight_*2*R(0,0);	// df/dR(0,0)
 				jacobians[0][ 1] = cost_function_weight_*2*R(1,0);	// df/dR(1,0)
 				jacobians[0][ 2] = cost_function_weight_*2*R(2,0);	// df/dR(2,0)
@@ -408,7 +409,7 @@ public:
 		// define residual and block_size
 		set_num_residuals(3);
 		std::vector<int>* block_sizes =  mutable_parameter_block_sizes();
-		block_sizes->push_back(12);
+		block_sizes->push_back(12);                                                    // 两个参数块，每个参数块有12个参数
 		block_sizes->push_back(12);
 
 		g_j_ = g_j;
@@ -436,16 +437,18 @@ public:
 
 			if (jacobians!=NULL){
 				if(jacobians[0]!=NULL){
-					jacobians[0][ 0] = cost_function_weight_ * alpha_j_k * ( g_k_(0) - g_j_(0) );
-					jacobians[0][ 1] = 0;
-					jacobians[0][ 2] = 0;
-					jacobians[0][ 3] = cost_function_weight_ * alpha_j_k * ( g_k_(1) - g_j_(1) );
-					jacobians[0][ 4] = 0;
+					// 对第一个参数块中的Rj和tj求导
+					// regularizer term 的残差由有3项 每一项对12个参数求导 所以一行雅可比有3*12个元素
+					jacobians[0][ 0] = cost_function_weight_ * alpha_j_k * ( g_k_(0) - g_j_(0) );    // df/dR(0,0)
+					jacobians[0][ 1] = 0;															 // df/dR(1,0)
+					jacobians[0][ 2] = 0;															 // df/dR(2,0)
+					jacobians[0][ 3] = cost_function_weight_ * alpha_j_k * ( g_k_(1) - g_j_(1) );    // df/dR(0,1)
+					jacobians[0][ 4] = 0;                                                            // df/dR(1,1)
 					jacobians[0][ 5] = 0;
-					jacobians[0][ 6] = cost_function_weight_ * alpha_j_k * ( g_k_(2) - g_j_(2) );
+					jacobians[0][ 6] = cost_function_weight_ * alpha_j_k * ( g_k_(2) - g_j_(2) );    // df/dR(0,2)
 					jacobians[0][ 7] = 0;
 					jacobians[0][ 8] = 0;
-					jacobians[0][ 9] = cost_function_weight_ * alpha_j_k;
+					jacobians[0][ 9] = cost_function_weight_ * alpha_j_k;                            // df/dT(0)
 					jacobians[0][10] = 0;
 					jacobians[0][11] = 0;
 
@@ -475,7 +478,9 @@ public:
 					jacobians[0][10 + 12*2] = 0;
 					jacobians[0][11 + 12*2] = cost_function_weight_ * alpha_j_k;
 
+					
 
+					// 对第二个参数块中tk求导
 					jacobians[1][ 0] = 0;
 					jacobians[1][ 1] = 0;
 					jacobians[1][ 2] = 0;
@@ -536,9 +541,9 @@ public:
 					Eigen::Vector3d source, 
 					Eigen::Vector3d target){
 		// define residual and block_size
-		source_ = source;
-		target_ = target;
-		vector_g_ = vector_g;
+		source_ = source;                                    // 源点
+		target_ = target;                                    // 目标点
+		vector_g_ = vector_g;                                // 源点邻居
 		cost_function_weight_ = sqrt(cost_function_weight);
 
 		nodes_connectivity = vector_g_.size()-1;
@@ -552,14 +557,14 @@ public:
 		// equation (3)
 		w_j_.clear();
 		for (int i = 0; i < nodes_connectivity; ++i)
-			w_j_.push_back( pow(1 - (source_ - vector_g_[i]).squaredNorm() / (source_ - vector_g_.back()).squaredNorm(), 2) );
+			w_j_.push_back( pow(1 - (source_ - vector_g_[i]).squaredNorm() / (source_ - vector_g_.back()).squaredNorm(), 2) );    // 源点与近邻越近权重越大
 
 		double normalization_factor = 0;
 		for (int i = 0; i < nodes_connectivity; ++i)
 			normalization_factor += w_j_[i];
 
 		for (int i = 0; i < nodes_connectivity; ++i)
-			w_j_[i] /= normalization_factor;
+			w_j_[i] /= normalization_factor;                            // 归一化权重
 	}
 
 	~ConCostFunction(){
@@ -577,6 +582,7 @@ public:
 			{
 				Eigen::Map<const Eigen::Matrix3d> R_j(parameters[i]);
 				Eigen::Map<const Eigen::Vector3d> t_j(parameters[i]+9);
+				// source根据近邻节点的R和t进行变换
 				new_node_position += w_j_[i] * (R_j * (source_ - vector_g_[i]) + vector_g_[i] + t_j);
 			}
 
@@ -587,15 +593,17 @@ public:
 
 			if (jacobians!=NULL){
 				if(jacobians[0]!=NULL){
+					// 有几个近邻
+					// 3个残差 每个残差对12个参数求导 所以一行雅可比有3*12个元素
 					for (int i = 0; i < w_j_.size(); ++i)
 					{
-						jacobians[i][ 0] = cost_function_weight_ * w_j_[i]*( source_(0) - vector_g_[i](0) );
+						jacobians[i][ 0] = cost_function_weight_ * w_j_[i]*( source_(0) - vector_g_[i](0) );       // df1/dR(0,0)
 						jacobians[i][ 1] = 0;
 						jacobians[i][ 2] = 0;
-						jacobians[i][ 3] = cost_function_weight_ * w_j_[i]*( source_(1) - vector_g_[i](1) );
+						jacobians[i][ 3] = cost_function_weight_ * w_j_[i]*( source_(1) - vector_g_[i](1) );       // df1/dR(0,1)
 						jacobians[i][ 4] = 0;
 						jacobians[i][ 5] = 0;
-						jacobians[i][ 6] = cost_function_weight_ * w_j_[i]*( source_(2) - vector_g_[i](2) );
+						jacobians[i][ 6] = cost_function_weight_ * w_j_[i]*( source_(2) - vector_g_[i](2) );       // df1/dR(0,2)
 						jacobians[i][ 7] = 0;
 						jacobians[i][ 8] = 0;
 						jacobians[i][ 9] = cost_function_weight_ * w_j_[i];
@@ -603,7 +611,7 @@ public:
 						jacobians[i][11] = 0;
 
 						jacobians[i][ 0 + 12] = 0;
-						jacobians[i][ 1 + 12] = cost_function_weight_ * w_j_[i]*( source_(0) - vector_g_[i](0) );
+						jacobians[i][ 1 + 12] = cost_function_weight_ * w_j_[i]*( source_(0) - vector_g_[i](0) );  // df2/dR(1.0)
 						jacobians[i][ 2 + 12] = 0;
 						jacobians[i][ 3 + 12] = 0;
 						jacobians[i][ 4 + 12] = cost_function_weight_ * w_j_[i]*( source_(1) - vector_g_[i](1) );
@@ -617,7 +625,7 @@ public:
 
 						jacobians[i][ 0 + 12*2] = 0;
 						jacobians[i][ 1 + 12*2] = 0;
-						jacobians[i][ 2 + 12*2] = cost_function_weight_ * w_j_[i]*( source_(0) - vector_g_[i](0) );
+						jacobians[i][ 2 + 12*2] = cost_function_weight_ * w_j_[i]*( source_(0) - vector_g_[i](0) );  // df3/dR(2,0)
 						jacobians[i][ 3 + 12*2] = 0;
 						jacobians[i][ 4 + 12*2] = 0;
 						jacobians[i][ 5 + 12*2] = cost_function_weight_ * w_j_[i]*( source_(1) - vector_g_[i](1) );
@@ -642,6 +650,100 @@ private:
 	double cost_function_weight_;
 };
 
+
+// point to plane 自己添加的
+class p2plCostFunction: public ceres::CostFunction
+{
+public:
+	// constructor
+	p2plCostFunction(double cost_function_weight, 
+	                std::vector<Eigen::Vector3d> vector_g, 
+					Eigen::Vector3d source, 
+					Eigen::Vector3d target,
+					Eigen::Vector3d normal){
+		// define residual and block_size
+		source_ = source;                                    // 源点
+		target_ = target;                                    // 目标点
+		vector_g_ = vector_g;                                // 源点邻居
+		normal_ = normal;                                    // 目标点法向量
+		cost_function_weight_ = sqrt(cost_function_weight);
+
+		nodes_connectivity = vector_g_.size()-1;
+		
+		// set the size of the parameters input
+		set_num_residuals(1);
+		std::vector<int>* block_sizes =  mutable_parameter_block_sizes();
+		for (int i = 0; i < nodes_connectivity; ++i)
+			block_sizes->push_back(12);
+		
+		// equation (3)
+		w_j_.clear();
+		for (int i = 0; i < nodes_connectivity; ++i)
+			w_j_.push_back( pow(1 - (source_ - vector_g_[i]).squaredNorm() / (source_ - vector_g_.back()).squaredNorm(), 2) );    // 源点与近邻越近权重越大
+
+		double normalization_factor = 0;
+		for (int i = 0; i < nodes_connectivity; ++i)
+			normalization_factor += w_j_[i];
+
+		for (int i = 0; i < nodes_connectivity; ++i)
+			w_j_[i] /= normalization_factor;                            // 归一化权重
+	}
+
+	~p2plCostFunction(){
+	}
+
+	virtual bool Evaluate(double const* const* parameters,
+                          double* residuals,
+                          double** jacobians) const{
+			Eigen::Map<Eigen::MatrixXd>res(residuals,1,1);
+
+			// back to equation (8)
+			Eigen::Vector3d new_node_position;
+			new_node_position << 0, 0, 0;
+			for (int i = 0; i < nodes_connectivity; ++i)
+			{
+				Eigen::Map<const Eigen::Matrix3d> R_j(parameters[i]);
+				Eigen::Map<const Eigen::Vector3d> t_j(parameters[i]+9);
+				new_node_position += w_j_[i] * (R_j * (source_ - vector_g_[i]) + vector_g_[i] + t_j);
+			}
+
+			res(0,0) = cost_function_weight_ * (new_node_position - target_).transpose() * normal_;
+
+
+			if (jacobians!=NULL){
+				if(jacobians[0]!=NULL){
+					// 有几个近邻
+					for (int i = 0; i < w_j_.size(); ++i)
+					{
+						jacobians[i][ 0] = cost_function_weight_ * w_j_[i] * normal_(0) * (source_(0) - vector_g_[i](0));       // df/dR(0,0)
+						jacobians[i][ 1] = cost_function_weight_ * w_j_[i] * normal_(1) * (source_(0) - vector_g_[i](0));		// df/dR(1,0)		
+						jacobians[i][ 2] = cost_function_weight_ * w_j_[i] * normal_(2) * (source_(0) - vector_g_[i](0));	    // df/dR(2,0)
+						jacobians[i][ 3] = cost_function_weight_ * w_j_[i] * normal_(0) * (source_(1) - vector_g_[i](1));       // df/dR(0,1)
+						jacobians[i][ 4] = cost_function_weight_ * w_j_[i] * normal_(1) * (source_(1) - vector_g_[i](1));	    // df/dR(1,1)
+						jacobians[i][ 5] = cost_function_weight_ * w_j_[i] * normal_(2) * (source_(1) - vector_g_[i](1));	    // df/dR(2,1)
+						jacobians[i][ 6] = cost_function_weight_ * w_j_[i] * normal_(0) * (source_(2) - vector_g_[i](2));       // df/dR(0,2)
+						jacobians[i][ 7] = cost_function_weight_ * w_j_[i] * normal_(1) * (source_(2) - vector_g_[i](2));       // df/dR(1,2)
+						jacobians[i][ 8] = cost_function_weight_ * w_j_[i] * normal_(2) * (source_(2) - vector_g_[i](2));       // df/dR(2,2)
+						jacobians[i][ 9] = cost_function_weight_ * w_j_[i] * normal_(0);										// df/dT(0)
+						jacobians[i][10] = cost_function_weight_ * w_j_[i] * normal_(1);								        // df/dT(1)
+						jacobians[i][11] = cost_function_weight_ * w_j_[i] * normal_(2);									    // df/dT(2)
+					}
+				}
+			}
+			return true;
+	}
+
+private:
+	Eigen::Vector3d source_;
+	Eigen::Vector3d target_;
+	Eigen::Vector3d normal_;
+	std::vector<Eigen::Vector3d> vector_g_;
+	std::vector<double> w_j_;
+	int nodes_connectivity;
+	double cost_function_weight_;
+};
+
+// point to plane 自己添加的
 
 // equation (20) in ElasticFusion (journal version) 
 class RelCostFunction: public ceres::CostFunction

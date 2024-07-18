@@ -1,9 +1,3 @@
-/*
-*   Greedy Search
-*   by R. Falque
-*   29/11/2018
-*/
-
 #ifndef GETMINMAX_HPP
 #define GETMINMAX_HPP
 
